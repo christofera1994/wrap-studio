@@ -1,3 +1,10 @@
+function json(resBody: any, status = 200) {
+  return new Response(JSON.stringify(resBody), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
+
 export async function onRequestGet({ env }: any) {
   const r = await fetch(
     `${env.VITE_SUPABASE_URL}/rest/v1/gallery_items?select=*&is_active=eq.true&order=sort_order.asc`,
@@ -15,13 +22,37 @@ export async function onRequestGet({ env }: any) {
     id: x.id,
     title: x.title,
     description: x.description,
-    imageUrl: x.image_url,     // 👈 ključna stvar
-    sortOrder: x.sort_order,   // 👈
-    isActive: x.is_active,     // 👈
+    imageUrl: x.image_url,
+    sortOrder: x.sort_order,
+    isActive: x.is_active,
     createdAt: x.created_at ?? null,
   }));
 
-  return new Response(JSON.stringify(mapped), {
+  return json(mapped, r.status);
+}
+
+export async function onRequestPost({ request, env }: any) {
+  const body = await request.json();
+
+  const r = await fetch(`${env.VITE_SUPABASE_URL}/rest/v1/gallery_items`, {
+    method: "POST",
+    headers: {
+      apikey: env.SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({
+      title: body.title,
+      description: body.description,
+      image_url: body.imageUrl ?? body.image_url,
+      sort_order: body.sortOrder ?? body.sort_order ?? 999,
+      is_active: body.isActive ?? body.is_active ?? true,
+    }),
+  });
+
+  const txt = await r.text();
+  return new Response(txt, {
     status: r.status,
     headers: { "content-type": "application/json" },
   });
