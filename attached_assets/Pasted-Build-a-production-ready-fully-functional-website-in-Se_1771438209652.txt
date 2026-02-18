@@ -1,0 +1,70 @@
+Build a production-ready, fully functional website in Serbian for a “Car Wrap Studio” with a Ferrari-red + black premium aesthetic and cinematic animations. It must be WOW but not generic AI template.
+
+STACK:
+- Vite + React + react-router
+- Tailwind + Framer Motion
+- Supabase for DB + Auth + Storage (use my existing project)
+
+CRITICAL:
+- Use my existing Supabase project (DO NOT create your own).
+- All content loads from Supabase (no hardcoded services/gallery).
+- Admin panel access ONLY if profiles.is_admin=true. Non-admin logged users must not access admin routes.
+- Implement scroll-snap 100vh sections and a performant animated canvas background (particles/light streaks/noise), tuned for mobile.
+
+ENV VARS (I will set in Replit Secrets):
+Frontend:
+- VITE_SUPABASE_URL
+- VITE_SUPABASE_ANON_KEY
+
+Backend (server only, never sent to browser):
+- SUPABASE_SERVICE_ROLE_KEY  (used ONLY for seeding initial content and admin-only server actions)
+Optional email:
+- RESEND_API_KEY
+- MY_EMAIL
+
+SUPABASE TABLES exist:
+- services(id, title, description, price, is_active, sort_order, created_at)
+- gallery_items(id, title, description, image_url, is_active, sort_order, created_at)
+- contact_messages(id, name, email, message, status, created_at)
+- profiles(id, is_admin, created_at)
+Storage bucket "gallery" exists but DO NOT require user to upload anything manually for the initial launch.
+
+AUTO-SEED REQUIREMENT (no manual adding):
+- Implement a server-side seed routine that runs on backend start:
+  - If services table is empty, insert 6 realistic wrap services with prices (Ferrari vibe).
+  - If gallery_items table is empty, insert 9 gallery items with high-quality public car wrap images (use stable public image URLs, e.g. from Unsplash CDN) and good titles/descriptions.
+  - The seed must be idempotent (safe to run multiple times without duplicates).
+- Use SUPABASE_SERVICE_ROLE_KEY server-side for seeding so it bypasses RLS safely.
+- Never expose service role key to frontend.
+
+PUBLIC ROUTES:
+- "/" single-page scroll-snap experience with sections:
+  1) Hero: Ferrari red accents (#d50000 style) on deep black, huge typography: “Premium Car Wrap Studio”
+     CTA: “Zakaži konsultaciju” (scroll to contact), “Pogledaj radove” (scroll to gallery)
+     Include a minimal 01-05 list that scrolls to sections.
+  2) Services: load from Supabase, premium pricing cards, animations, skeleton states.
+  3) Gallery: load from Supabase, grid + lightbox modal.
+  4) Benefits: short punchy Serbian copy.
+  5) FAQ accordion.
+  6) Contact: form inserts into contact_messages; also call /api/send-contact to email MY_EMAIL if configured.
+
+ADMIN:
+- /admin/login (Supabase email/password)
+- /admin dashboard tabs:
+  A) Services CRUD (create/edit/delete/toggle/order)
+  B) Gallery CRUD (create/edit/delete/toggle/order; allow upload to Storage bucket "gallery" and save URL)
+  C) Inbox (view contact_messages + change status)
+- Route protection: redirect if not logged in; if logged in but not admin show “Nemate pristup” + logout.
+
+BACKEND:
+- Minimal Node/Express server in the same Replit project:
+  - POST /api/send-contact (Resend if configured, else return 200 “Email not configured”)
+  - On startup run seed routine described above.
+
+DELIVERABLE:
+- Full working Replit project with all files and folder structure.
+- README with exact steps:
+  1) set Replit Secrets
+  2) run
+  3) publish
+- Ensure build works and runs immediately after env vars are set.
