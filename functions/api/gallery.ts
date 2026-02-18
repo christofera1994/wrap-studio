@@ -9,7 +9,19 @@ export async function onRequestGet({ env }: any) {
     }
   );
 
-  return new Response(await r.text(), {
+  const rows = await r.json();
+
+  const mapped = (rows || []).map((x: any) => ({
+    id: x.id,
+    title: x.title,
+    description: x.description,
+    imageUrl: x.image_url,     // 👈 ključna stvar
+    sortOrder: x.sort_order,   // 👈
+    isActive: x.is_active,     // 👈
+    createdAt: x.created_at ?? null,
+  }));
+
+  return new Response(JSON.stringify(mapped), {
     status: r.status,
     headers: { "content-type": "application/json" },
   });
