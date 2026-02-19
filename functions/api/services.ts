@@ -1,6 +1,17 @@
-export async function onRequestGet() {
-  // privremeno: samo da proverimo da endpoint radi
-  return new Response(JSON.stringify({ ok: true, route: "services GET" }), {
+export async function onRequestGet({ env }: any) {
+  const r = await fetch(
+    `${env.VITE_SUPABASE_URL}/rest/v1/services?select=*&is_active=eq.true&order=sort_order.asc`,
+    {
+      headers: {
+        apikey: env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${env.VITE_SUPABASE_ANON_KEY}`,
+      },
+    }
+  );
+
+  const txt = await r.text();
+  return new Response(txt, {
+    status: r.status,
     headers: { "content-type": "application/json" },
   });
 }
