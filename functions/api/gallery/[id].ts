@@ -1,9 +1,8 @@
-function json(resBody: any, status = 200) {
-  return new Response(JSON.stringify(resBody), {
+const json = (data: any, status = 200) =>
+  new Response(JSON.stringify(data), {
     status,
     headers: { "content-type": "application/json" },
   });
-}
 
 export async function onRequestPatch({ request, params, env }: any) {
   const id = params.id;
@@ -29,10 +28,18 @@ export async function onRequestPatch({ request, params, env }: any) {
     }
   );
 
-  const txt = await r.text();
-  return new Response(txt, {
-    status: r.status,
-    headers: { "content-type": "application/json" },
+  const updated = await r.json();
+  const x = updated?.[0];
+  if (!x) return json({ message: "Update failed" }, r.status);
+
+  return json({
+    id: x.id,
+    createdAt: x.created_at,
+    title: x.title,
+    description: x.description,
+    imageUrl: x.image_url,
+    isActive: x.is_active,
+    sortOrder: x.sort_order,
   });
 }
 
