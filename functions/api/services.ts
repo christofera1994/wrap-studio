@@ -9,9 +9,20 @@ export async function onRequestGet({ env }: any) {
     }
   );
 
-  const txt = await r.text();
-  return new Response(txt, {
-    status: r.status,
+  const rows = await r.json();
+
+  const mapped = (rows || []).map((x: any) => ({
+    id: x.id,
+    createdAt: x.created_at,
+    title: x.title,
+    description: x.description,
+    price: x.price,
+    isActive: x.is_active,
+    sortOrder: x.sort_order,
+  }));
+
+  return new Response(JSON.stringify(mapped), {
+    status: 200,
     headers: { "content-type": "application/json" },
   });
 }
